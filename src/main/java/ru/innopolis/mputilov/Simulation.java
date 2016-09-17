@@ -1,10 +1,10 @@
 package ru.innopolis.mputilov;
 
-import java.security.SecureRandom;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import static ru.innopolis.mputilov.Helper.joinWithIgnorance;
 import static ru.innopolis.mputilov.Helper.sleepWithIgnorance;
 
 /**
@@ -16,12 +16,17 @@ public class Simulation {
 
     public void run() {
         Thread inputThread = new Thread(this::inputThread);
-        inputThread.run();
-        for (int i = 0; i < 100; i++) {
+        inputThread.start();
+        for (int i = 0; i < 100 && isThreadAlive(inputThread); i++) {
             sleepWithIgnorance(100L);
             tryToFindMatchingOrders();
         }
+        joinWithIgnorance(inputThread, 10_000L);
         System.out.println("Simulation is complete!");
+    }
+
+    private boolean isThreadAlive(Thread inputThread) {
+        return !inputThread.getState().equals(Thread.State.TERMINATED);
     }
 
     private void tryToFindMatchingOrders() {
